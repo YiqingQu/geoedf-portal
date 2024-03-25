@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import logging
+import os
 from pathlib import Path
 from django.template import context_processors
 from myportal import fields
@@ -18,9 +19,6 @@ log = logging.getLogger(__name__)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep all secret keys used in production secret!
 # You can generate a secure secret key with `openssl rand -hex 32`
@@ -60,6 +58,7 @@ LOGIN_URL = '/login/cilogon'
 # LOGIN_URL = '/login/globus'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/accounts/profile/'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 # This dictates which scopes will be requested on each user login
 SOCIAL_AUTH_GLOBUS_SCOPE = [
@@ -70,10 +69,44 @@ SOCIAL_AUTH_GLOBUS_SCOPE = [
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ["https://geoedf-portal.anvilcloud.rcac.purdue.edu"]
 
-PROJECT_TITLE = 'GeoEDF'
+PROJECT_TITLE = 'GeoEDF Resource Data Portal'
 SEARCH_INDEXES = {
     'schema-org-index': {
+        'uuid': 'dfbccff7-36f8-43e2-9e6e-c38059184985',
+        'name': 'GeoEDF Index',
+        'template_override_dir': 'geoedf-index',
+        'fields': [
+            ('extension', fields.extension),
+            ('size_bytes', fields.size_bytes),
+            ('name', fields.name),
+            ('id', fields.identifier),
+        ],
+        'facets': [  # limit of 3 facets
+            {
+                'name': 'Creator',
+                'field_name': 'schemaorgJson.creator.@list.name',
+                'size': 10,
+                'type': 'terms'
+            },
+            {
+                'name': 'Tags',
+                'field_name': 'tags',
+                'size': 10,
+                'type': 'terms'
+            },
+            {
+                'name': 'Extension',
+                'field_name': 'extension',
+                'size': 10,
+                'type': 'terms'
+            },
+
+
+        ],
+    },
+    'schema-org-index-v1': {
         'uuid': '15a6acc8-3a23-42ed-98cf-a32833acaae3',
         'name': 'Schema.org Json Index',
         'template_override_dir': 'schema-org-index',
@@ -82,7 +115,6 @@ SEARCH_INDEXES = {
             ('size_bytes', fields.size_bytes),
             ('name', fields.name),
             # ('creator', fields.creator_name),
-            # ('creative_work_status', fields.creative_work_status),
             ('id', fields.identifier),
         ],
         'facets': [  # limit of 3 facets
@@ -118,6 +150,16 @@ SEARCH_INDEXES = {
             #     "date_interval": "hour",
             # },
 
+        ],
+    },
+    'list-search-index': {
+        'uuid': 'dfbccff7-36f8-43e2-9e6e-c38059184985',
+        'name': 'GeoEDF List Search Index',
+        'fields': [
+            ('extension', fields.extension),
+            ('size_bytes', fields.size_bytes),
+            ('name', fields.name),
+            ('id', fields.identifier),
         ],
     }
 }
@@ -169,6 +211,19 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        },
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}
 
 ROOT_URLCONF = 'myportal.urls'
 
@@ -237,6 +292,8 @@ STATICFILES_DIRS = [
     'static/',
 ]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -247,3 +304,9 @@ try:
 except ImportError:
     expected_path = Path(__file__).resolve().parent / 'local_settings.py'
     log.warning(f'You should create a file for your secrets at {expected_path}')
+
+# pagination settings
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,  # Adjust the page size as needed
+}

@@ -8,6 +8,7 @@ from rest_framework import status, permissions, serializers
 from rest_framework.views import APIView
 import requests
 
+from myportal.utils import get_domain_name
 
 
 class GetTokenRequest(serializers.Serializer):
@@ -20,6 +21,9 @@ class GetToken(APIView):
 
     @swagger_auto_schema(request_body=GetTokenRequest, )
     def post(self, request):
+        """
+        Return the Access Token
+        """
         return Response(
             data={"status": "OK", "token": "bearer access token"},
             status=status.HTTP_200_OK,
@@ -30,15 +34,11 @@ class VerifyToken(APIView):
     permission_classes = (permissions.AllowAny,)
 
     @swagger_auto_schema(manual_parameters=[
-        openapi.Parameter(
-            'Authorization',
-            openapi.IN_HEADER,
-            description='Authentication token',
-            type=openapi.TYPE_STRING,
-            required=True,
-        ),
     ], )
     def get(self, request):
+        """
+            Verify the Access Token
+        """
         authorization_header = request.headers.get('Authorization')
         if not authorization_header or not authorization_header.startswith('Bearer '):
             return HttpResponseBadRequest('Invalid Authorization header')
@@ -67,4 +67,6 @@ class GetCode(APIView):
 
     @swagger_auto_schema()
     def get(self, request):
-        return Response({"url": "https://cilogon.org/authorize?response_type=code&client_id=cilogon:/client_id/34d8b8c1560547fa1023ceacc000dd96&redirect_uri=https://localhost:8000/accounts/cilogon/login/callback/&scope=openid+profile+email+org.cilogon.userinfo+edu.uiuc.ncsa.myproxy.getcert"})
+        domain = get_domain_name()
+        return Response({
+                            "url": "https://cilogon.org/authorize?response_type=code&client_id=cilogon:/client_id/34d8b8c1560547fa1023ceacc000dd96&redirect_uri=https://" + domain + "/accounts/cilogon/login/callback/&scope=openid+profile+email+org.cilogon.userinfo+edu.uiuc.ncsa.myproxy.getcert"})

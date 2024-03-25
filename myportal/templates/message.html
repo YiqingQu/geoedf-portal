@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block headextras %}
+    <meta charset="UTF-8">
+    <title>GeoEDF Data Resource Portal</title>
+    <style>
+        #msg-title {
+            color: #ff6347;
+            font-size: 4rem;
+            margin-top: 4rem;
+            text-align: center;
+
+        }
+
+        #msg-content {
+            color: #333;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <h1 id="msg-title">Message</h1>
+    <p id="msg-content">{{ msg }}</p>
+{% endblock %}

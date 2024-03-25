@@ -1,0 +1,22 @@
+manual_parameters:
+  - name: Authorization
+    in: header
+    description: Authentication token
+    required: true
+    schema:
+      type: string
+  - name: PublishResourceRequest
+    schema:
+      type: object
+    properties:
+      publication_name:
+        type: string
+        nullable: true
+      path:
+        type: string
+      resource_type:
+        type: string
+    required:
+      - path
+      - resource_type
+

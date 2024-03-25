@@ -1,4 +1,6 @@
 import requests
+import json
+import logging
 
 # Get FAIRShare Tests
 
@@ -7,12 +9,12 @@ r = requests.get('https://presqt-prod.crc.nd.edu/api_v1/services/fairshare/evalu
 r.json()
 # FAIRShare example through PresQT endpoint
 
-json = {
+json_obj = {
     "resource_id": "10.17605/OSF.IO/EGGS12",
     "tests": [1, 2]
 }
 headers = {'presqt-email-opt-in': 'False'}
-r = requests.post('https://presqt-prod.crc.nd.edu/api_v1/services/fairshare/evaluator', headers=headers, json=json)
+r = requests.post('https://presqt-prod.crc.nd.edu/api_v1/services/fairshare/evaluator', headers=headers, json=json_obj)
 r.json()
 
 # Direct Evaluation through FAIR Maturity Indicators and Tools
@@ -34,16 +36,29 @@ presQT_tests = {'Unique Identifier': 'https://w3id.org/FAIR_Tests/tests/gen2_uni
                 'Data Knowledge Representation Language (strong)': 'https://w3id.org/FAIR_Tests/tests/gen2_data_kr_language_strong',
                 'Metadata uses FAIR vocabularies (strong)': 'https://w3id.org/FAIR_Tests/tests/gen2_metadata_uses_fair_vocabularies_strong',
                 'Metadata Includes License (weak)': 'https://w3id.org/FAIR_Tests/tests/gen2_metadata_includes_license_weak'}
-subject = 'http://localhost:8002/schema-org-index/resource/a7d9795b-e799-4761-9289-a8643f06bdb0'
-# subject = '10.5072/zenodo.926573'
+subject = 'https://geoedf-portal.anvilcloud.rcac.purdue.edu/resource/62b507fb-f69b-4e7c-a112-4302dd269146'
 
 
 def runFAIRMITest(test, url, subject):
     r = requests.post(url, json={'subject': subject})
     passed = bool(r.json()[0]['http://semanticscience.org/resource/SIO_000300'][0]['@value'])
-    print('%s: %s' % (test, str(passed)))
+    result = r.content.decode('utf-8')
+    # print(result)
+    # print(type(result))
+
+    comment = json.loads(result)
+    comment = comment[0]["http://schema.org/comment"][0]["@value"]
+    print('■■■%s: %s \n %s' % (test, str(passed), comment))
+    logging.log(1, '■■■%s: %s \n %s' % (test, str(passed), comment))
     return passed
 
 
+logging.basicConfig( filemode="w", format="%(name)s -> %(levelname)s: %(message)s")
+
+result = []
+
 for test, url in presQT_tests.items():
-    runFAIRMITest(test, url, subject)
+    result.append(runFAIRMITest(test, url, subject))
+
+print(result)
+

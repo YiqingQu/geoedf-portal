@@ -8,10 +8,12 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="google-site-verification" content="GrrE5wkX7Bq2iLFLLTHuY0iP6ZhyDvosm5AtaD9mC7I"/><!-- For google site verification, always keep this tag -->
+    <meta name="google-site-verification" content="GrrE5wkX7Bq2iLFLLTHuY0iP6ZhyDvosm5AtaD9mC7I"/>
+    <!-- For google site verification, always keep this tag -->
 
     {# CSS files #}
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}"/>
 
     {# Custom Fonts #}
     <script type="text/javascript" src="{% static 'js/fontawesome-all.min.js' %}"></script>
@@ -21,6 +23,33 @@
 
     {# Extras #}
     {% block headextras %}{% endblock %}
+
+    {# dynamic login callback url #}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var loginLink = $('#login-link');
+
+            // Simulate an AJAX response (replace this with your actual AJAX logic)
+            $.ajax({
+                url: '/domain/get/',
+                success: function (data) {
+                    console.log(data.domain);
+                    var existingHref = loginLink.attr('href');
+                    var newHref = existingHref.replace('domain', data.domain);
+                    if (data.domain === 'localhost:8000') {
+                        newHref = newHref.replace('https', 'http');
+                        console.log('equal');
+                    }
+                    loginLink.attr('href', newHref);
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    </script>
+
 
     <title>{% block title %}{% endblock %}</title>
 
@@ -37,23 +66,33 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto"></ul>
+        <ul class="navbar-nav my-lg-0">
+
+                {% if  request.user.is_authenticated %}
+                    <li>
+                        <a id="file-manage" class="nav-link"
+                           href="{% url 'file-manage' %}">My Resources</a>
+                    </li>
+                {% endif %}
+            </ul>
             <ul class="navbar-nav my-lg-0">
 
-                {% if backends.backends and request.user.is_authenticated %}
+                {% if  request.user.is_authenticated %}
                     <li>
                         <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
                     </li>
                     <li>
-                        <a class="nav-link" href="/user/profile/">{{ request.user.username }}</a>
+                        <a class="nav-link" href="/accounts/profile/">{{ request.user.username }}</a>
                     </li>
-                {% elif  not request.user.is_authenticated %}
-{#                    'cilogon' in backends.backends and#}
+                {% elif not request.user.is_authenticated %}
+                    {#                'globus' in backends.backends and #}
                     <li>
-              <a class="nav-link" href="{% provider_login_url 'cilogon' next='https://geoedf-portal.anvilcloud.rcac.purdue.edu/accounts/cilogon/login/callback/' %}">Login</a>
-{#              <a class="nav-link" href="{% url 'social:begin' 'cilogon' %}?next={{ request.get_full_path|urlencode }}">Login</a>#}
-            </li>
+                        <a id="login-link" class="nav-link"
+                           href="{% provider_login_url 'cilogon' next='https://domain/accounts/cilogon/login/callback' %}">Login</a>
+                    </li>
                 {% endif %}
             </ul>
+
         </div>
     </div>
 </nav>
@@ -68,5 +107,7 @@
 <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/popper.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+{% block extrascripts %}
+{% endblock %}
 </body>
 </html>

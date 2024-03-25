@@ -3,29 +3,39 @@
 
 {% block headextras %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/account-profile.css' %}"/>
-
 {% endblock %}
+
 {% block body %}
-    <h1>Profile</h1>
-    <p>Here is your account information:</p>
-    <ul>
-        <li>Username: {{ user.username }}</li>
-        <li>Email: {{ user.email }}</li>
-    </ul>
-    <h2>Change Password</h2>
-    <form method="post" action="{% url 'account_change_password' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Change Password</button>
-    </form>
-    <h2>Linked Social Accounts</h2>
-    {% if socialaccount_set %}
-        <ul>
-            {% for socialaccount in socialaccount_set %}
-                <li>{{ socialaccount.provider }}: {{ socialaccount.uid }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>You have not linked any social accounts yet.</p>
-    {% endif %}
+    <div class="profile-container">
+        <h1 class="profile-heading">Profile</h1>
+        <div class="profile-info">
+            <p>Here is your account information:</p>
+            <ul>
+                <li><strong>Username:</strong> {{ user.username }}</li>
+                <li><strong>Email:</strong> {{ user.email }}</li>
+            </ul>
+        </div>
+
+        <div class="password-change-container">
+            <h2 class="password-change-heading">Change Password</h2>
+            <form method="post" action="{% url 'account_change_password' %}" class="password-change-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="password-change-button">Change Password</button>
+            </form>
+        </div>
+
+        <div class="linked-accounts-container">
+            <h2 class="linked-accounts-heading">Linked Social Accounts</h2>
+            {% if socialaccount_set %}
+                <ul class="linked-accounts-list">
+                    {% for socialaccount in socialaccount_set %}
+                        <li><strong>{{ socialaccount.provider }}:</strong> {{ socialaccount.uid }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>You have not linked any social accounts yet.</p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

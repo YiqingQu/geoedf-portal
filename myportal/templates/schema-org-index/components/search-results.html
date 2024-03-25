@@ -25,7 +25,7 @@
 
 {% block breadcrumb_items %}
     {{ block.super }}
-    <li class="breadcrumb-item {% is_active request 'search' index=globus_portal_framework.index %}">
+    <li class="breadcrumb-item {% is_active request 'search' %}">
         <a class="h5">{{ project_info.title }} Search</a>
     </li>
 {% endblock %}
@@ -35,7 +35,7 @@
 
         {% block search_form %}
             <form id="search-form" class="my-4" name="search_form"
-                  action="{% block search_form_url %}{% url 'search' globus_portal_framework.index %}{% endblock %}">
+                  action="{% block search_form_url %}{% url 'search' index=globus_portal_framework.index %}{% endblock %}">
                 <input type="text" id="search-input" autocomplete="off"
                        data-provide="typeahead" name="q"
                        value="{{ request.session.search.query }}" placeholder="Start your search here">
@@ -67,16 +67,16 @@
                             <div class="card my-3">
                                 <div class="card-header">
                                     <h3 class="search-title">
-                                        <a href="{% url 'resource' globus_portal_framework.index result.id %}">{{ result.name|default:'Result' }}</a>
+                                        <a href="{% url 'resource' result.id %}">{{ result.name|default:'Result' }}</a>
                                     </h3>
                                 </div>
                                 <div class="card-body">
                                     <table class="table table-sm borderless">
                                         <tbody>
-                                        {% for element in result.all %}
+                                        {% with element=result.all|first %}
                                             <tr> <!--style="width: 100px" -->
 
-                                                <th>{{ "CreatorName" }}</th>
+                                                <th>{{ "Creator" }}</th>
                                                 <th>{{ "DatePublished" }}</th>
                                                 <th>{{ "DateModified" }}</th>
                                             </tr>
@@ -85,7 +85,7 @@
                                                 {% if element.schemaorgJson.creator.items != None %}
                                                     {% for key, value in element.schemaorgJson.creator.items %}
                                                         {% for item_value in value %}
-                                                            <th>{{ item_value.name }}</th>
+                                                            <th>{{ item_value.email }}</th>
                                                         {% endfor %}
                                                     {% endfor %}
                                                 {% else %}
@@ -95,7 +95,7 @@
                                             <th>{{ element.schemaorgJson.datePublished|slice:":10"  }}</th>
                                             <th>{{ element.dateModified|slice:":10" }}</th>
                                             </tr>
-                                        {% endfor %}
+                                        {% endwith %}
                                         </tbody>
                                     </table>
                                 </div>

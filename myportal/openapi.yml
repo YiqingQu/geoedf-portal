@@ -1,0 +1,13 @@
+openapi: "3.0.0"
+info:
+  title: My API
+  description: My API description
+  version: "1.0.0"
+paths:
+  /my-endpoint/:
+    get:
+      summary: Get my endpoint
+      description: Get my endpoint description
+      responses:
+        "200":
+          description: Successful response
